@@ -10,10 +10,10 @@
  *   - 定期把到期的延迟任务移到执行队列（taskQueue）  advanceTimers
  *   - 智能设置下一次检查时间，避免不必要的检查       handleTimeout
  */
-import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { peek, pop, push } from './2.MinHeap.js';
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
-import { schedulePerformWorkUntilDeadline } from './8.PerformWorkUntilDeadline.js';
+import { unstable_now as getCurrentTime } from './03.TimeTools.js';
+import { peek, pop, push } from './02.MinHeap.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
+import { schedulePerformWorkUntilDeadline } from './08.PerformWorkUntilDeadline.js';
 
 
 

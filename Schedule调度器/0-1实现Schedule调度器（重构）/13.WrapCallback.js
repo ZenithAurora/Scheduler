@@ -8,7 +8,7 @@
  * 用途：确保回调函数行为一致
  */
 
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
 
 
 // 包装回调函数，以创建时候的优先级执行  -- 对应官方：unstable_wrapCallback

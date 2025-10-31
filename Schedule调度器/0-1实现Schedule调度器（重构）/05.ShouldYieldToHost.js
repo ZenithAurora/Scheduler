@@ -10,8 +10,8 @@
  *   （2）什么时候该让人滚出来？
  */
 
-import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
+import { unstable_now as getCurrentTime } from './03.TimeTools.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
 
 // （1）设置下一个人的厕所使用截止时间  -- 你到 9：50就得出来
 export function setDeadline() {

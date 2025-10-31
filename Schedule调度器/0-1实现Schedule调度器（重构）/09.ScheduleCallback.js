@@ -13,12 +13,11 @@
  *    （2）将任务加到任务队列后， 如果当前没有工作循环，那么就启动循环
  */
 
-import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { getTimeoutByPriority } from './3.TimeTools.js';
-import { push, peek } from './2.MinHeap.js';
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
-import { schedulePerformWorkUntilDeadline } from './8.PerformWorkUntilDeadline.js';
-import { handleTimeout, requestHostTimeout, cancelHostTimeout } from './6.AdvanceTimers.js';
+import { unstable_now as getCurrentTime, getTimeoutByPriority } from './03.TimeTools.js';
+import { push, peek } from './02.MinHeap.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
+import { schedulePerformWorkUntilDeadline } from './08.PerformWorkUntilDeadline.js';
+import { handleTimeout, requestHostTimeout, cancelHostTimeout } from './06.AdvanceTimers.js';
 
 
 // 任务调度

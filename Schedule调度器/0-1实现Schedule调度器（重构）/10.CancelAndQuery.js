@@ -5,7 +5,7 @@
  * - 查询状态："现在是什么情况？"
  */
 
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
 
 // （1）取消任务 - 对应官方 unstable_cancelCallback
 /**

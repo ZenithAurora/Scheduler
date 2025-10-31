@@ -9,10 +9,10 @@ import {
   NormalPriority,
   LowPriority,
   IdlePriority
-} from './1.Priorities.js'
-import { unstable_now } from './3.TimeTools.js';
-import { shouldYieldToHost } from './5.ShouldYieldToHost.js';
-import { unstable_scheduleCallback } from './9.ScheduleCallback.js'
+} from './01.Priorities.js'
+import { unstable_now } from './03.TimeTools.js';
+import { shouldYieldToHost } from './05.ShouldYieldToHost.js';
+import { unstable_scheduleCallback } from './09.ScheduleCallback.js'
 import { unstable_cancelCallback, unstable_getCurrentPriorityLevel } from './10.CancelAndQuery.js';
 import { unstable_runWithPriority, unstable_next } from './11.PriorityControl.js';
 import { unstable_requestPaint, unstable_forceFrameRate } from './12.PaintUtils.js';

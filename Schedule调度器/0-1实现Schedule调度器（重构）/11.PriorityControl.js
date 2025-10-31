@@ -1,7 +1,8 @@
 // 11.PriorityControl.js - 优先级控制
 // 这个文件就是身份临时变更系统！
 
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
+
 
 
 // （1）用指定优先级运行 - 对应官方 unstable_runWithPriority

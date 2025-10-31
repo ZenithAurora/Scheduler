@@ -28,10 +28,10 @@
  * 简单说：经理安排厨师轮班工作，每轮5分钟，保证餐厅持续运营
  */
 
-import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { flushWork } from './7.WorkLoop.js';
-import { setDeadline } from './5.ShouldYieldToHost.js';
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
+import { unstable_now as getCurrentTime } from './03.TimeTools.js';
+import { flushWork } from './07.WorkLoop.js';
+import { setDeadline } from './05.ShouldYieldToHost.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
 
 
 // （1）执行工作直到截止时间 - 对应官方：performWorkUntilDeadline

@@ -24,11 +24,11 @@
 
 
 
-import { peek, pop } from './2.MinHeap.js';
-import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { SCHEDULER_STATE } from './4.SchedulerState.js';
-import { shouldYieldToHost } from './5.ShouldYieldToHost.js';
-import { advanceTimers, handleTimeout, requestHostTimeout, cancelHostTimeout } from './6.AdvanceTimers.js';
+import { peek, pop } from './02.MinHeap.js';
+import { unstable_now as getCurrentTime } from './03.TimeTools.js';
+import { SCHEDULER_STATE } from './04.SchedulerState.js';
+import { shouldYieldToHost } from './05.ShouldYieldToHost.js';
+import { advanceTimers, handleTimeout, requestHostTimeout, cancelHostTimeout } from './06.AdvanceTimers.js';
 
 
 // （1）调度器工作循环入口函数

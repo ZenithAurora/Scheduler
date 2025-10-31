@@ -5,7 +5,7 @@
  *    2. 帧率控制
  */
 
-import { SCHEDULER_STATE } from './4.SchedulerState.js'
+import { SCHEDULER_STATE } from './04.SchedulerState.js'
 
 
 // （1）请求重新绘制  - 对应官方 unstable_requestPaint
