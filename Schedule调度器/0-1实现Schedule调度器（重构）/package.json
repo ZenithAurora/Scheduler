@@ -1,6 +1,6 @@
 {
   "name": "scheduler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "手写react schedule调度器",
   "main": "1.Priorities.js",
   "scripts": {
