@@ -26,15 +26,7 @@
 
 import { peek, pop } from './2.MinHeap.js';
 import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import {
-  taskQueue,                 // 任务队列
-  timerQueue,                // 延时队列
-  isPerformingWork,          // 是否正在执行工作循环
-  isHostCallbackScheduled,   // 是否已经安排了工作循环调度
-  isHostTimeoutScheduled,    // 是否已经安排了延迟任务检查
-  currentTask,               // 当前正在执行的任务（对象）
-  currentPriorityLevel       // 当前调度优先级
-} from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 import { shouldYieldToHost } from './5.ShouldYieldToHost.js';
 import { advanceTimers, handleTimeout, requestHostTimeout, cancelHostTimeout } from './6.AdvanceTimers.js';
 
@@ -48,19 +40,19 @@ export function flushWork(initialTime) {
    * 3.使用try-finally保证无论工作是否成功，状态都能正确清理
    */
   // 重置调度状态，防止重复调度
-  isHostCallbackScheduled = false;
+  SCHEDULER_STATE.isHostCallbackScheduled = false;
 
   // 如果已经安排了延迟任务检查，就取消它
-  if (isHostTimeoutScheduled) {
-    isHostTimeoutScheduled = false;
+  if (SCHEDULER_STATE.isHostTimeoutScheduled) {
+    SCHEDULER_STATE.isHostTimeoutScheduled = false;
     cancelHostTimeout();
   }
 
   // 标记正在执行工作循环中....
-  isPerformingWork = true;
+  SCHEDULER_STATE.isPerformingWork = true;
 
   // 保存当前优先级
-  const previousPriorityLevel = currentPriorityLevel;
+  const previousPriorityLevel = SCHEDULER_STATE.currentPriorityLevel;
 
   try {
     // 工作循环开始！
@@ -68,11 +60,11 @@ export function flushWork(initialTime) {
   }
   finally {
     // 清理当前任务引用 - 当前任务已完成或暂停
-    currentTask = null;
+    SCHEDULER_STATE.currentTask = null;
     // 恢复原始优先级
-    currentPriorityLevel = previousPriorityLevel;
+    SCHEDULER_STATE.currentPriorityLevel = previousPriorityLevel;
     // 标记 工作循环已完成 
-    isPerformingWork = false;
+    SCHEDULER_STATE.isPerformingWork = false;
   }
 }
 
@@ -86,7 +78,7 @@ function workLoop(initialTime) {
   advanceTimers(currentTime);
 
   // （2）瞄一眼任务队列的第一个任务
-  currentTask = peek(taskQueue);
+  const currentTask = peek(SCHEDULER_STATE.taskQueue);
 
   // 开始叫号循环！
   while (currentTask !== null) {
@@ -98,7 +90,7 @@ function workLoop(initialTime) {
     const currentCallback = currentTask.callback;
     if (typeof currentCallback === 'function') {
       currentTask.callback = null;
-      currentPriorityLevel = currentTask.priorityLevel;
+      SCHEDULER_STATE.currentPriorityLevel = currentTask.priorityLevel;
 
       // 执行任务，看这个人是不是"便秘"（执行完是不是又返回了新的回调函数）
       const didTimeout = currentTask.expirationTime <= currentTime;
@@ -120,8 +112,8 @@ function workLoop(initialTime) {
          * 如果你不检查，你以为没有新的任务进来直接把第一个给删除了，你猜李四会对你说什么😃
          * （李四：我******尔冯了个福，你删错人了）
          */
-        if (currentTask === peek(taskQueue)) {
-          pop(taskQueue);
+        if (currentTask === peek(SCHEDULER_STATE.taskQueue)) {
+          pop(SCHEDULER_STATE.taskQueue);
         }
       }
 
@@ -136,11 +128,11 @@ function workLoop(initialTime) {
      *   终于你拿到厕所的使用权了，结果发现，你并不是想拉💩，你憋了半天，只是一个屁💭
      */
     else {
-      pop(taskQueue);
+      pop(SCHEDULER_STATE.taskQueue);
     }
 
     // 瞄一眼任务队列的第一个任务
-    currentTask = peek(taskQueue);
+    currentTask = peek(SCHEDULER_STATE.taskQueue);
   }
 
 
@@ -154,7 +146,7 @@ function workLoop(initialTime) {
   if (currentTask !== null) return true;
   else {
     // 瞄一眼预约队列
-    const firstTimerTask = peek(timerQueue);
+    const firstTimerTask = peek(SCHEDULER_STATE.timerQueue);
     if (firstTimerTask !== null) {
       // 设置下一次检查预约的时间
       const timeoutTime = firstTimerTask.startTime - currentTime;

@@ -16,14 +16,7 @@
 import { unstable_now as getCurrentTime } from './3.TimeTools.js';
 import { getTimeoutByPriority } from './3.TimeTools.js';
 import { push, peek } from './2.MinHeap.js';
-import {
-  taskQueue,
-  timerQueue,
-  taskIdCounter,
-  isHostCallbackScheduled,
-  isPerformingWork,
-  isHostTimeoutScheduled
-} from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 import { schedulePerformWorkUntilDeadline } from './8.PerformWorkUntilDeadline.js';
 import { handleTimeout, requestHostTimeout, cancelHostTimeout } from './6.AdvanceTimers.js';
 
@@ -74,7 +67,7 @@ export function unstable_scheduleCallback(priorityLevel, callback, options) {
 // （1）将回调函数封装成一个任务对象
 function createTaskObject(priorityLevel, callback, startTime, expirationTime) {
   const newTask = {
-    id: taskIdCounter++,
+    id: SCHEDULER_STATE.taskIdCounter++,
     callback,
     priorityLevel,
     startTime,
@@ -87,11 +80,11 @@ function createTaskObject(priorityLevel, callback, startTime, expirationTime) {
 // （2）把一个立即执行的任务加入任务队列
 function handleImmediateTask(newTask, expirationTime) {
   newTask.sortIndex = expirationTime;
-  push(taskQueue, newTask);
+  push(SCHEDULER_STATE.taskQueue, newTask);
 
   // 如果没有安排任务循环，并且当前工作循环也没有在进行中，那么就立刻启动一个工作循环
-  if (!isHostCallbackScheduled && !isPerformingWork) {
-    isHostCallbackScheduled = true;
+  if (!SCHEDULER_STATE.isHostCallbackScheduled && !SCHEDULER_STATE.isPerformingWork) {
+    SCHEDULER_STATE.isHostCallbackScheduled = true;
     schedulePerformWorkUntilDeadline();
   }
 }
@@ -99,14 +92,14 @@ function handleImmediateTask(newTask, expirationTime) {
 //（3）把一个延时执行的任务加入延时队列
 function handleDelayedTask(newTask, startTime, currentTime) {
   newTask.sortIndex = startTime;
-  push(timerQueue, newTask);
+  push(SCHEDULER_STATE.timerQueue, newTask);
 
   // 放入一个任务，就得计算一下，下次啥时候来检查延时队列
-  if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
+  if (peek(SCHEDULER_STATE.taskQueue) === null && newTask === peek(SCHEDULER_STATE.timerQueue)) {
     // 如果你已经安排了延迟任务检查（你之前已经设置了一个闹钟了），由于新任务进来了，你得重新设置闹钟，所以久得取消了
-    if (isHostTimeoutScheduled) cancelHostTimeout();
+    if (SCHEDULER_STATE.isHostTimeoutScheduled) cancelHostTimeout();
     // 闹钟设置好了
-    else isHostTimeoutScheduled = true;
+    else SCHEDULER_STATE.isHostTimeoutScheduled = true;
 
     // 计算一下，下一次应该啥时候来检查延时队列呢？
     const delay = startTime - currentTime;

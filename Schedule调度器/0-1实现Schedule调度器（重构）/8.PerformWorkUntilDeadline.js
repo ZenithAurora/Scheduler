@@ -31,23 +31,20 @@
 import { unstable_now as getCurrentTime } from './3.TimeTools.js';
 import { flushWork } from './7.WorkLoop.js';
 import { setDeadline } from './5.ShouldYieldToHost.js';
-import {
-  isPerformingWork,
-  isHostCallbackScheduled,
-} from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 
 
 // （1）执行工作直到截止时间 - 对应官方：performWorkUntilDeadline
 export function performWorkUntilDeadline() {
 
   //  如果正在执行工作循环，就直接返回
-  if (isPerformingWork) return;
+  if (SCHEDULER_STATE.isPerformingWork) return;
 
   // 设置当前监督时段的截止时间
   setDeadline();
 
   // 标记开始工作
-  isPerformingWork = true;
+  SCHEDULER_STATE.isPerformingWork = true;
 
   // 记录开始时间
   const startTime = getCurrentTime();
@@ -61,8 +58,8 @@ export function performWorkUntilDeadline() {
   } finally {
     // 如果还有任务没有执行完，那等下一轮循环调度
     if (hasMoreWork) schedulePerformWorkUntilDeadline();
-    else isHostCallbackScheduled = false;
-    isPerformingWork = false;     // 标记工作结束
+    else SCHEDULER_STATE.isHostCallbackScheduled = false;
+    SCHEDULER_STATE.isPerformingWork = false;     // 标记工作结束
   }
 }
 
@@ -83,10 +80,10 @@ export function performWorkUntilDeadline() {
 export function schedulePerformWorkUntilDeadline() {
 
   //  如果已经安排工作循环，那就直接返回
-  if (isHostCallbackScheduled) return;
+  if (SCHEDULER_STATE.isHostCallbackScheduled) return;
 
   // 标记已安排工作循环
-  isHostCallbackScheduled = true;
+  SCHEDULER_STATE.isHostCallbackScheduled = true;
 
   /**
    * 🎯 实现真正的异步调度

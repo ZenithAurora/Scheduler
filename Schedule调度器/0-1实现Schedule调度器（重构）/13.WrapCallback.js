@@ -8,28 +8,28 @@
  * 用途：确保回调函数行为一致
  */
 
-import { currentPriorityLevel } from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 
 
 // 包装回调函数，以创建时候的优先级执行  -- 对应官方：unstable_wrapCallback
 export function unstable_wrapCallback(callback) {
   // 记下当前全局环境中的优先级   比方是  3
   // parentPriorityLevel =  3
-  const parentPriorityLevel = currentPriorityLevel;
+  const parentPriorityLevel = SCHEDULER_STATE.currentPriorityLevel;
 
   // 返回出去的这个函数，可能在其他优先级环境下运行，比方5
   return function () {
     // previousPriorityLevel = 5
     // 这里的currentPriorityLevel 是 指的调用时的优先级，不是创建时的优先级
-    const previousPriorityLevel = currentPriorityLevel;
+    const previousPriorityLevel = SCHEDULER_STATE.currentPriorityLevel;
     // 这里，把当前优先级调整到创建时的优先级，确保行为一致
-    currentPriorityLevel = parentPriorityLevel;
+    SCHEDULER_STATE.currentPriorityLevel = parentPriorityLevel;
 
     try {
       return callback.apply(this, arguments);
     } finally {
       // 最后，恢复调用时的优先级，不影响其他任务
-      currentPriorityLevel = previousPriorityLevel;
+      SCHEDULER_STATE.currentPriorityLevel = previousPriorityLevel;
     }
   };
 }
@@ -51,18 +51,18 @@ export function unstable_wrapCallback(callback) {
 function demonstrateWrapCallbackProblem() {
   // 用户点击是高优先级（2）
   unstable_runWithPriority(2, function handleUserClick() {
-    console.log("Click handling, priority:", currentPriorityLevel); // 2
+    console.log("Click handling, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2
 
     // ❌ 错误方法：直接传递函数，没有包装！
     setTimeout(function updateUI() {
       // 问题：优先级变成了3（默认）！
-      console.log("UI update, priority:", currentPriorityLevel); // 3 ← 优先级丢失！
+      console.log("UI update, priority:", SCHEDULER_STATE.currentPriorityLevel); // 3 ← 优先级丢失！
       // 用户会感觉界面响应更慢！
     }, 1000);
 
     // ✅ 正确方法：使用wrapCallback包装回调函数
     const updateWithIdentity = unstable_wrapCallback(function updateWithPriority() {
-      console.log("UI update, priority:", currentPriorityLevel); // 2 ← 优先级保持一致！
+      console.log("UI update, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2 ← 优先级保持一致！
     });
     setTimeout(updateWithIdentity, 1000);
   });
@@ -73,16 +73,16 @@ function demonstrateWrapCallbackProblem() {
  */
 function demonstratePromiseChainProblem() {
   unstable_runWithPriority(2, function highPriorityTask() {
-    console.log("Task start, priority:", currentPriorityLevel); // 2
+    console.log("Task start, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2
 
     // ❌ 错误方法：直接传递回调函数，没有包装！
     fetch('/api/data').then(function processData() {
-      console.log("Data processing, priority:", currentPriorityLevel); // 3 ← 丢失了优先级！    
+      console.log("Data processing, priority:", SCHEDULER_STATE.currentPriorityLevel); // 3 ← 丢失了优先级！    
     });
 
     // ✅ 正确方法：使用wrapCallback包装回调函数
     const processWithIdentity = unstable_wrapCallback(function processWithPriority() {
-      console.log("Data processing, priority:", currentPriorityLevel); // 2 ← 优先级保持一致！
+      console.log("Data processing, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2 ← 优先级保持一致！
     });
     fetch('/api/data').then(processWithIdentity);
   });
@@ -95,16 +95,16 @@ function demonstratePromiseChainProblem() {
  */
 function demonstrateEventListenerProblem() {
   unstable_runWithPriority(2, function setupListener() {
-    console.log("Setup listener, priority:", currentPriorityLevel); // 2
+    console.log("Setup listener, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2
 
     // ❌ 错误方法：直接绑定事件处理函数，没有包装！
     document.addEventListener('custom-event', function handleEvent() {
-      console.log("Event handling, priority:", currentPriorityLevel); // 3 ← 丢失了优先级！  事件触发时的优先级是3，不是2
+      console.log("Event handling, priority:", SCHEDULER_STATE.currentPriorityLevel); // 3 ← 丢失了优先级！  事件触发时的优先级是3，不是2
     });
 
     // ✅ 正确方法：使用wrapCallback包装事件处理函数
     const handleWithIdentity = unstable_wrapCallback(function handleWithPriority() {
-      console.log("Event handling, priority:", currentPriorityLevel); // 2 ← 优先级保持一致！
+      console.log("Event handling, priority:", SCHEDULER_STATE.currentPriorityLevel); // 2 ← 优先级保持一致！
     });
     document.addEventListener('custom-event', handleWithIdentity);
   });

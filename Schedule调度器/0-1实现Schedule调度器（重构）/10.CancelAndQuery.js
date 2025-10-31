@@ -5,7 +5,7 @@
  * - 查询状态："现在是什么情况？"
  */
 
-import { currentPriorityLevel } from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 
 // （1）取消任务 - 对应官方 unstable_cancelCallback
 /**
@@ -30,5 +30,5 @@ export function unstable_cancelCallback(task) {
  * 比如：根据当前紧急程度决定执行逻辑
  */
 export function unstable_getCurrentPriorityLevel() {
-  return currentPriorityLevel;
+  return SCHEDULER_STATE.currentPriorityLevel;
 }

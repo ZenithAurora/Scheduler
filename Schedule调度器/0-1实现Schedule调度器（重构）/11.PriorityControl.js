@@ -1,7 +1,7 @@
 // 11.PriorityControl.js - 优先级控制
 // 这个文件就是身份临时变更系统！
 
-import { currentPriorityLevel } from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 
 
 // （1）用指定优先级运行 - 对应官方 unstable_runWithPriority
@@ -13,13 +13,13 @@ import { currentPriorityLevel } from './4.ScheduleState.js';
  * 办完事又恢复原来的身份
  */
 export function unstable_runWithPriority(priorityLevel, eventHandler) {
-  const previousPriorityLevel = currentPriorityLevel;
-  currentPriorityLevel = priorityLevel;
+  const previousPriorityLevel = SCHEDULER_STATE.currentPriorityLevel;
+  SCHEDULER_STATE.currentPriorityLevel = priorityLevel;
 
   try {
     return eventHandler();
   } finally {
-    currentPriorityLevel = previousPriorityLevel;
+    SCHEDULER_STATE.currentPriorityLevel = previousPriorityLevel;
   }
 }
 
@@ -33,19 +33,19 @@ export function unstable_next(eventHandler) {
   let priorityLevel;
 
   // 智能降级：高紧急程度 → 普通
-  switch (currentPriorityLevel) {
+  switch (SCHEDULER_STATE.currentPriorityLevel) {
     case 1: // ImmediatePriority
     case 2: // UserBlockingPriority  
     case 3: // NormalPriority
       priorityLevel = 3; // 降级到普通
       break;
     default:
-      priorityLevel = currentPriorityLevel;
+      priorityLevel = SCHEDULER_STATE.currentPriorityLevel;
   }
 
   // 先记录下当前的紧急程度
-  const previousPriorityLevel = currentPriorityLevel;
-  currentPriorityLevel = priorityLevel;
+  const previousPriorityLevel = SCHEDULER_STATE.currentPriorityLevel;
+  SCHEDULER_STATE.currentPriorityLevel = priorityLevel;
 
   try {
     return eventHandler();
@@ -53,6 +53,6 @@ export function unstable_next(eventHandler) {
     // 这里表明，恢复领导得高优先级，毕竟我们说过，只是临时降级嘛
     // 如果不恢复会怎么样？
     // 领导：我#@*冯，我只是临时降级处理，别真的给我降薪降职呀？ 这公司可是我开的！
-    currentPriorityLevel = previousPriorityLevel;
+    SCHEDULER_STATE.currentPriorityLevel = previousPriorityLevel;
   }
 }

@@ -5,12 +5,12 @@
  *    2. 帧率控制
  */
 
-import { frameInterval, needsPaint } from './4.ScheduleState'
+import { SCHEDULER_STATE } from './4.SchedulerState.js'
 
 
 // （1）请求重新绘制  - 对应官方 unstable_requestPaint
 export function unstable_requestPaint() {
-  needsPaint = true;
+  SCHEDULER_STATE.needsPaint = true;
 }
 
 
@@ -25,8 +25,8 @@ export function unstable_forceFrameRate(fps) {
     );
     return;
   }
-  if (fps > 0) frameInterval = Math.floor(1000 / fps);
+  if (fps > 0) SCHEDULER_STATE.frameInterval = Math.floor(1000 / fps);
   // 默认 5ms
-  else frameInterval = 5;
+  else SCHEDULER_STATE.frameInterval = 5;
 
 }

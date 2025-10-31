@@ -12,7 +12,7 @@
  */
 import { unstable_now as getCurrentTime } from './3.TimeTools.js';
 import { peek, pop, push } from './2.MinHeap.js';
-import { taskQueue, timerQueue, isHostCallbackScheduled, isHostTimeoutScheduled, taskTimeoutID } from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 import { schedulePerformWorkUntilDeadline } from './8.PerformWorkUntilDeadline.js';
 
 
@@ -21,21 +21,21 @@ import { schedulePerformWorkUntilDeadline } from './8.PerformWorkUntilDeadline.j
 // 作用：检查预约队列，有哪些人到时间了，到时间了就从预约队列移到等待队列
 export function advanceTimers(currentTime) {
   // 瞄一眼延时队列中的  堆顶元素（最早到期的任务）
-  let timerTask = peek(timerQueue);
+  let timerTask = peek(SCHEDULER_STATE.timerQueue);
 
   while (timerTask !== null) {
     // 有人取消了 - 这个人说 "我 *了，憋死算了，不上了🤬"
-    if (timerTask.callback === null) pop(timerQueue);
+    if (timerTask.callback === null) pop(SCHEDULER_STATE.timerQueue);
     else if (timerTask.startTime <= currentTime) {
       // 快要到时间了！从预约队列移到等待队列
-      pop(timerQueue);
+      pop(SCHEDULER_STATE.timerQueue);
       timerTask.sortIndex = timerTask.expirationTime;
-      push(taskQueue, timerTask);
+      push(SCHEDULER_STATE.taskQueue, timerTask);
     }
     else return;// 堆顶元素都还没到时间，后面的也不用看了（因为最小堆是按时间排序的）
 
     // 继续看下一个堆顶元素
-    timerTask = peek(timerQueue);
+    timerTask = peek(SCHEDULER_STATE.timerQueue);
   }
 }
 
@@ -65,9 +65,9 @@ export function cancelHostTimeout() {
    * 1. 如果定时器存在且有效，清除它
    * 2. 重置定时器ID为-1，表示没有活跃的定时器
    */
-  if (taskTimeoutID !== -1) {
-    clearTimeout(taskTimeoutID);
-    taskTimeoutID = -1;
+  if (SCHEDULER_STATE.taskTimeoutID !== -1) {
+    clearTimeout(SCHEDULER_STATE.taskTimeoutID);
+    SCHEDULER_STATE.taskTimeoutID = -1;
   }
 }
 
@@ -94,24 +94,24 @@ export function handleTimeout(currentTime) {
   // 这里的currentTime就是在requestHostTimeout中传递的当前时间
 
   // 1. 当前延迟检查已完成，清除标志
-  isHostTimeoutScheduled = false;
+  SCHEDULER_STATE.isHostTimeoutScheduled = false;
 
   // 2. 推进定时器，检查是否有延迟任务到期
   advanceTimers(currentTime);
 
   // 3. 如果还没有安排工作循环
-  if (!isHostCallbackScheduled) {
+  if (!SCHEDULER_STATE.isHostCallbackScheduled) {
 
     // （1）如果任务队列有任务：安排工作循环
-    if (peek(taskQueue) !== null) {
-      isHostCallbackScheduled = true;  // 已经安排了工作循环来了哈！
+    if (peek(SCHEDULER_STATE.taskQueue) !== null) {
+      SCHEDULER_STATE.isHostCallbackScheduled = true;  // 已经安排了工作循环来了哈！
       schedulePerformWorkUntilDeadline() // 启动工作循环
       // 如果是按照代码文件顺序来看的，看到这里可能会懵，没关系，先不管这个工作循环具体做了啥，因为代码实在后面才实现，等后面再回头来看这里就行
     }
 
     // （2）没有任务了，那就设置下一次检查时间
     else {
-      const firstTimerTask = peek(timerQueue);
+      const firstTimerTask = peek(SCHEDULER_STATE.timerQueue);
       if (firstTimerTask !== null) {
         const nextDelayTime = firstTimerTask.startTime - currentTime;
         // 安排下一次延迟任务检查（智能调度，避免不必要的轮询）

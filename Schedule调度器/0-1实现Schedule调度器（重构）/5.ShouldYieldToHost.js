@@ -11,11 +11,11 @@
  */
 
 import { unstable_now as getCurrentTime } from './3.TimeTools.js';
-import { needsPaint, frameInterval, deadline } from './4.ScheduleState.js';
+import { SCHEDULER_STATE } from './4.SchedulerState.js';
 
 // （1）设置下一个人的厕所使用截止时间  -- 你到 9：50就得出来
 export function setDeadline() {
-  deadline = getCurrentTime() + frameInterval;
+  SCHEDULER_STATE.deadline = getCurrentTime() + SCHEDULER_STATE.frameInterval;
 }
 
 
@@ -35,6 +35,6 @@ export function shouldYieldToHost() {
    * else return false
    */
 
-  return getCurrentTime() >= deadline || needsPaint; // 简写
+  return getCurrentTime() >= SCHEDULER_STATE.deadline || SCHEDULER_STATE.needsPaint; // 简写
 }
 
